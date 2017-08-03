@@ -1,0 +1,572 @@
+﻿<%@ master language="C#" autoeventwireup="true" inherits="ProCode_SheetDetailPageNew, SISS.ISHOP4.WEB_deploy" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE8" />
+    <style type="text/css">
+        #dicbasic
+        {
+            height: 39px;
+        }
+        .ToolBarImg1
+        {
+        }
+    </style>
+</head>
+<body onload="SetDivHegith(3, 'SheetBasic', 'SheetDetailDiv');" onkeydown="onkeyboard();">
+    <%--onkeydown=""CloseWindow('btnReturn')""--%>
+    <!--loading -->
+    <script type="text/javascript">
+        document.body.oncopy = function () {
+            if (document.getElementById("ctl00_hidCopy").value == "1") {
+                alert('禁止复制');
+                return false;
+            }
+        }
+    </script>
+    <div id="loading_container" style="display: none;">
+        <div id="loading_blind" style="filter: alpha(opacity=50); -moz-opacity: 0.4; opacity: 0.3;
+            background-color: #ffffff; width: 100%; height: 100%; z-index: 1000; position: absolute;
+            left: 0; top: 0; overflow: hidden; vertical-align: bottom;" align="center">
+        </div>
+        <div id="loading" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+            z-index: 1001;">
+            <table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td align="center" style="vertical-align: middle;">
+                        <div style="background-color: #ffffff; border: 1px solid #ccc; width: 130px; height: 34px;">
+                            <span style="position: relative; top: -12px;">请稍后..</span><img src="<%=ResolveUrl("~") %>Images/sys_waiting.gif" /></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!--end loading-->
+    <form id="fmSheetMaster" runat="server">
+    <asp:ScriptManager ID="ScriptManager2" runat="server" OnAsyncPostBackError="ScriptManager_AsyncPostBackError"
+        EnablePartialRendering="true" AsyncPostBackTimeout="300" />
+    <script type="text/javascript">
+        Sys.Application.add_load(function () {
+            var form = Sys.WebForms.PageRequestManager.getInstance()._form;
+            form._initialAction = form.action = window.location.href;
+        });
+    </script>
+    <script src="<%=ResolveUrl("~") %>JS/jquery.divbox.js" type="text/javascript"></script>
+    <script src="<%=ResolveUrl("~") %>JS/SheetCommon.js" type="text/javascript"></script>
+    <script src="<%=ResolveUrl("~") %>JS/SheetForEdit.js" type="text/javascript"></script>
+    <script src="<%=ResolveUrl("~") %>JS/editgrid.js" type="text/javascript"></script>
+    <div id="MainAreas">
+        <asp:UpdatePanel ID="UpdatePanel3" runat="server" UpdateMode="Conditional">
+            <ContentTemplate>
+                <div id="ToolBar" class="ToolBarInfo">
+                    <div class="ToolBarBacking">
+                        &nbsp;&nbsp;&nbsp;
+                        <button id="btnInsert" type="button" runat="server" class="ToolBarButton" onclick="NewSheet();return false;"
+                            style="width: 70px;">
+                            <img alt="新增" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Add.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">新增</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <button id="btnSave" type="button" runat="server" class="ToolBarButton" onclick="SaveSheet();return false"
+                            commandname="SaveSheet" style="width: 70px;">
+                            <span>&nbsp;</span>
+                            <img alt="保存" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Save.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">保存</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <button id="btnApprove" type="button" runat="server" class="ToolBarButton" onclick="GridDataValidation();ApproveSheet();changeBackgroundColor();return false;"
+                            style="width: 70px;">
+                            <span>&nbsp;</span>
+                            <img alt="审核" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Shenhe.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">审核</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <%--店间直调总部用到--%>
+                        <button id="btnAgree" type="button" runat="server" class="ToolBarButton" onserverclick="btnExecFunc_click"
+                            commandname="AgreeSheet" style="width: 70px;" visible="false">
+                            <span>&nbsp;</span>
+                            <img alt="同意" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Shenhe.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">同意</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <button id="btnNoAgree" type="button" runat="server" class="ToolBarButton" onserverclick="btnExecFunc_click"
+                            commandname="NoAgreeSheet" style="width: 70px;" visible="false">
+                            <span>&nbsp;</span>
+                            <img alt="不同意" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_zz.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">不同意</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <%--店间直调总部用到end--%>
+                        <button id="btnItems" type="button" runat="server" class="ToolBarButton" onclick="ItemSelects()"
+                            style="width: 100px;">
+                            <span>&nbsp;</span>
+                            <img alt="商品选择" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Selectsp.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">商品选择</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <%--分店费用用到--%>
+                        <button id="btnCost" type="button" runat="server" class="ToolBarButton" onclick="CostSelects()"
+                            style="width: 100px;" visible="false">
+                            <span>&nbsp;</span>
+                            <img alt="费用选择" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Selectsp.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">费用选择</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <%--分店费用用到end--%>
+                        <button id="btnScan" type="button" runat="server" class="ToolBarButton" onclick="ScanItem();"
+                            style="width: 70px;">
+                            <span>&nbsp;</span>
+                            <img alt="扫描" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Copy.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">扫描</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <button id="btnDeleteSheet" type="button" runat="server" class="ToolBarButton" onclick="DeleteSheet();return false;"
+                            style="width: 70px;">
+                            <span>&nbsp;</span>
+                            <img alt="删单" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Delete.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">删单</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <button id="btnStopSheet" type="button" runat="server" class="ToolBarButton" onclick="StopSheet();return false;"
+                            style="width: 70px;">
+                            <span>&nbsp;</span>
+                            <img alt="终止" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_zz.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">终止</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <button id="btnPrint" type="button" runat="server" class="ToolBarButton" onclick="GridDataValidation();"
+                            onserverclick="btnPrint_click" commandname="Print" style="width: 70px;">
+                            <span>&nbsp;</span>
+                            <img alt="打印" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Print.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">打印</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <button id="btnPosPrint" type="button" runat="server" class="ToolBarButton" onclick="GridDataValidation();"
+                            onserverclick="btnPosPrint_Click" style="width: 100px;" visible="false">
+                            <img alt="Pos打印" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Print.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">Pos打印</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <button id="btnSet" type="button" runat="server" class="ToolBarButton" style="width: 70px;"
+                            onclick="ColumnSetting();" commandname="Set">
+                            <span>&nbsp;</span>
+                            <img alt="设置" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Set.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">设置</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+                        <button id="btnDesignPrint" type="button" runat="server" class="ToolBarButton" onclick="return PrintSetting();"
+                            style="width: 90px;" visible="false">
+                            <%-- onmouseover="project_OnMouseOver(this)"--%>
+                            <img alt="自定义打印" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Print.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">自定义打印</span> <span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+
+
+
+
+
+
+
+
+
+
+
+
+          <%--QQJ  start66 --%>
+
+                        <% if (Request.QueryString["menuId"].Trim() == "2202" && String.IsNullOrEmpty(Request.QueryString["QQJ"]))
+                           {  %>
+
+
+                        <button id="buttonQQJCombineDYToPrint" type="button" runat="server" class="ToolBarButton" onclick="buttonQQJCombineDYToPrint_click();"
+                            commandname="Print" style="width: 130px;" title="由采购向导2所生成的采购订单，可以根据各个门店打印采购订单">
+                            <span>&nbsp;</span>
+                            <img alt="" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Print.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">合并要货单打印</span><span style="border-right: solid 1px #ccc">&nbsp;</span>
+                        </button>
+
+
+
+                        <script language="javascript" type="text/javascript">
+
+
+
+                            function buttonQQJCombineDYToPrint_click() {
+
+                                if (document.getElementById("<%=this.FindControl("hidSheetNo") == null?this.FindControl("hidSheet_No").ClientID:this.FindControl("hidSheetNo").ClientID%>").value == "") {
+                                    alert('没有选择单据，请先选择！');
+                                    return false;
+                                }
+                                else {
+
+                                    var win = window.open('../../QQJFroDL/CombineDYToPrint.aspx?menuId=2202&sheet_no=' + document.getElementById("<%=this.FindControl("hidSheetNo") == null?this.FindControl("hidSheet_No").ClientID:this.FindControl("hidSheetNo").ClientID%>").value, 'newwindow', 'top=0,left=0,menubar=no, scrollbars=yes,location=no,resizable=yes');
+                                    var h = screen.availHeight;
+                                    var w = screen.availWidth;
+                                    win.resizeTo(w, h);
+                                    window.opener = null;
+                                    window.open('', '_self');
+                                    return true;
+
+
+                                }
+
+
+
+                            }
+
+                        </script>
+
+
+
+                        <%} %>
+
+          <%--QQJ  end66 --%>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        <button id="btnReturn" type="button" runat="server" class="ToolBarButton" onclick="ReturnHome()"
+                            style="width: 70px;">
+                            <span>&nbsp;</span>
+                            <img alt="返回" src="<%=ResolveUrl("~") %>Images/flow_Toolbar_Return.png" class="ToolBarImgs" />
+                            <span class="ToolBarFont">返回</span>
+                        </button>
+                        <asp:Button ID="btnGoServer" type="button" runat="server" CssClass="buttons" Style="display: none"
+                            OnClick="btnGoServer_click" />
+                        <%--                            <div id="poject_select_area" class="ui-select-box1" style="position: absolute; display: none;"
+                              onmouseover="this.style.display='';" onmouseout="this.style.display='none';">
+                            <ul id="Ul1" class="ui-select-list" style="width:55px">
+                                <li id="Li1" onclick="javascript:GridDataValidation(); document.getElementById('ctl00_CHPSheetDetail_btnPrint3').click();return false;"
+                                    onmouseover="javascript:this.style.cursor='hand';this.style.backgroundColor='highlight';this.style.color='#fff';"
+                                    onmouseout="javascript:this.style.backgroundColor='#f2f2f2';this.style.color='#000';"
+                                    style="border-bottom: 1px solid #ccc; margin-top:3px; height:20px; vertical-align:middle;">&nbsp;打印预览&nbsp;</li>
+                                <li id="Li2" onclick="javascript:GridDataValidation(); document.getElementById('ctl00_CHPSheetDetail_btnPrintDesign').click();return false;"
+                                    onmouseover="javascript:this.style.cursor='hand';this.style.backgroundColor='highlight';this.style.color='#fff';"
+                                    onmouseout="javascript:this.style.backgroundColor='#f2f2f2';this.style.color='#000';"
+                                    style="border-bottom: 1px solid #ccc;margin-top:3px; height:20px;vertical-align:middle;">&nbsp;打印设置&nbsp;</li>
+                            </ul>
+                        </div> --%>
+                        <%--单据基本信息--%>
+                        <asp:TextBox ID="hidReturnUrl" ToolTip="返回查询界面[前台只能获取，不能修改]" Style="display: none"
+                            runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidNewUrl" ToolTip="新增页面路径[前台只能获取，不能修改]" Style="display: none" runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidTransNO" ToolTip="单据标志[前台只能获取，不能修改]" Style="display: none" runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidSheetNo" ToolTip="单号[前台只能获取，不能修改]" Style="display: none" runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidTempSheetNo" ToolTip="临时单号[前台只能获取，不能修改]" Style="display: none"
+                            runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidSheetState" ToolTip="单据状态0新增,1保存,2审核[前台只能获取，不能修改]" Style="display: none"
+                            runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidIsChange" ToolTip="当前单据明细是否发生改变[前台只能获取，不能修改]" Style="display: none"
+                            runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidIsDeleteRow" ToolTip="判断当前是否为删除行操作" Style="display: none" runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidItems" ToolTip="商品多选返回" Style="display: none" runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidCopy" ToolTip="当前选中行ID" Style="display: none" runat="server"
+                            Text="0"></asp:TextBox>
+                        <asp:TextBox ID="hidlastSelectedRowId" ToolTip="最后选中行ID" Style="display: none" runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidCurrSelectedRowId" ToolTip="当前选中行ID" Style="display: none" runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidBranchStock" ToolTip="当前选择的仓库，用于取对应库存用" Style="display: none"
+                            runat="server"></asp:TextBox>
+                        <%--  单据业务信息 --%>
+                        <asp:TextBox ID="PromptApprove" Style="display: none" runat="server" Text="0"></asp:TextBox>
+                        <input id="hidSheetPageFlag" type="hidden" />
+                        <asp:TextBox ID="hidFontSize" ToolTip="自定义打印明细字体[前台只能获取，不能修改]" Style="display: none"
+                            runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidPrint" ToolTip="自定义打印预览[前台只能获取，不能修改]" Style="display: none" runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidDesignGet" ToolTip="自定义保存返回值[前台只能获取，不能修改]" Style="display: none"
+                            runat="server"></asp:TextBox>
+                        <asp:TextBox ID="hidModelId" ToolTip="自定义打印模版ID" Style="display: none" runat="server"></asp:TextBox>
+                        <asp:Button ID="hidBtnPrintDesign" runat="server" OnClick="hidBtnPrintDesign_Click"
+                            Style="display: none" /><%--自定义打印设置后保存到数据库中--%>
+                        <%--  明细数据 --%>
+                        <input id="hidDetailData" type="hidden" runat="server" />
+                        <%--  系统业务参数 --%>
+                        <input id="hidSysParams" type="hidden" runat="server" />
+                        <%--  单据功能按钮信息 --%>
+                        <%--                   <asp:Button ID="hidbtnSaveAndNewSheet" runat="server" Text="SaveAndNewSheet||保存后新增" class="ToolBarButton" Style="display: none"
+                            CommandName="SaveAndNewSheet" OnClick="btnExecFunc_click" />
+                        <asp:Button ID="hidbtnNewSheet" runat="server" Text="NewSheet||新增" Style="display: none"
+                               OnClick="btnNewSheet_click" />
+                        <asp:Button ID="hidbtnSaveAndReturn" runat="server" Text="hidbtnSaveAndReturn||保存后返回" Style="display: none"
+                            CommandName="SaveAndReturn" OnClick="btnExecFunc_click" />
+                        <asp:Button ID="hidbtnReturnHome" runat="server" Text="hidbtnReturnHome||返回" Style="display: none"
+                            CommandName="ReturnHome" OnClick="btnExecFunc_click" />--%>
+                    </div>
+                </div>
+                <div id="allInfo">
+                    <div id="all_basic" onmouseover="try{document.getElementById('export_select_area').style.display = 'none';document.getElementById('import_select_area').style.display = 'none';}catch(e){}">
+                        <%--                        <div id="dicbasic" onclick="displayOrHide('tb_basic');" onmouseover="this.style.cursor='pointer'"
+                            title="折叠/展开">--%>
+                        <div id="dicbasic">
+                            <asp:Image ID="Image3" runat="server" ImageUrl="~/Images/flow_SmlToolbar_blackicon.gif"
+                                CssClass="sheetTitilImg" />
+                            <span id="spTitle" class="headline" runat="server">基本信息</span><span id="Span2" class="headline"
+                                style="font-size: 12px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;【单&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                号】：</span>
+                            <asp:TextBox ID="txtSheetNo" runat="server" BorderWidth="0" BackColor="Transparent"
+                                Font-Bold="true" Font-Names="宋体" ReadOnly="true" MaxLength="18" Width="272px"></asp:TextBox>
+                            <input type="hidden" id="hidPrintFormatTwo" value="0" runat="server"/>
+                        </div>
+                        <div id="tb_basic">
+                            <table cellpadding="0" cellspacing="0">
+                                <tr id="tr1">
+                                    <%--   <td style="width: 53%">--%>
+                                    <td style="width: 510px;">
+                                        <asp:ContentPlaceHolder ID="CPHSheetMaster" runat="server">
+                                        </asp:ContentPlaceHolder>
+                                    </td>
+                                    <td valign="top">
+                                        <table width="100%" id="tbSheetBasic">
+                                            <tr>
+                                                <td align="right" style="width: 70px;">
+                                                    制单人员：
+                                                </td>
+                                                <td align="left" style="width: 110px;">
+                                                    <asp:TextBox ID="txtOperID" runat="server" CssClass="txtUnderline" Width="100px"
+                                                        MaxLength="18" ReadOnly="True"></asp:TextBox>
+                                                </td>
+                                                <td align="right" style="width: 70px;">
+                                                    制单日期：
+                                                </td>
+                                                <td align="left">
+                                                    <asp:TextBox ID="txtOperDate" runat="server" CssClass="txtUnderline" Width="125px"
+                                                        MaxLength="18" ReadOnly="True"></asp:TextBox>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td align="right">
+                                                    <asp:Label ID="lblConfirmMan" runat="server" Text="审核人员："></asp:Label>
+                                                </td>
+                                                <td align="left">
+                                                    <%--审核显示--%>
+                                                    <div id="ApproveDiv" class="ApproveDiv" runat="server" visible="false">
+                                                        <asp:Label ID="lblchkStatus" runat="server" Text="已审核"></asp:Label></div>
+                                                    <asp:TextBox ID="txtConfirmMan" runat="server" CssClass="txtUnderline" Width="100px"
+                                                        MaxLength="18" ReadOnly="True"></asp:TextBox>
+                                                </td>
+                                                <td align="right">
+                                                    <asp:Label ID="lblWorkDate" runat="server" Text="审核日期："></asp:Label>
+                                                </td>
+                                                <td align="left">
+                                                    <asp:TextBox ID="txtWorkDate" runat="server" CssClass="txtUnderline" Width="125px"
+                                                        MaxLength="18" ReadOnly="True"></asp:TextBox>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="allgoods">
+                        <div id="sheetdetail">
+                            <table cellpadding="0" cellspacing="0" border="0" width="100%" height="100%">
+                                <tr>
+                                    <td>
+                                        <asp:Image ID="Image4" runat="server" ImageUrl="~/Images/flow_SmlToolbar_blackicon.gif"
+                                            CssClass="sheetTitilImg" />
+                                        <span id="Span3" class="headline">明细信息</span>
+                                    </td>
+                                    <td align="right">
+                                        <%--  <asp:ImageButton ID="ImgPageInsert" runat="server" ImageUrl="~/Images/sheet_add_page.png"
+                                            CssClass="ToolBarImg1" CommandName="PageInsert" OnClick="btnLeft_Click" ToolTip="新增一页" />
+                                        <asp:ImageButton ID="ImgDeleteRow" runat="server" ImageUrl="~/Images/sheet_del_row_btn.png"
+                                            CssClass="ToolBarImg1" CommandName="RowDelete" OnClientClick="On_GridViewRowDelete();"
+                                            ToolTip="删除选中行" />--%>
+                                        <button style="opacity: 0; filter: alpha(opacity=0);">
+                                        </button>
+                                        <asp:Button ID="imgReference" runat="server" CssClass="imgDetail" Text="" OnClientClick="ShowReferenceInfo();return false;"
+                                            ToolTip="参考信息" />&nbsp;&nbsp;
+                                        <asp:Button ID="ImgPageInsert" runat="server" CssClass="imgAdd" CommandName="PageInsert"
+                                            Text="" OnClientClick="AddOneRow();return false;" ToolTip="新增" />&nbsp;&nbsp;
+                                        <asp:Button ID="ImgDeleteRow" runat="server" CssClass="imgDelete" Text="" CommandName="RowDelete"
+                                            OnClientClick="On_GridViewRowDelete();return false;" ToolTip="删除" />&nbsp;&nbsp;
+                                        <asp:Button ID="ImgPageInsertRow" runat="server" CssClass="imgInsert" CommandName="PageInsertOther"
+                                            Text="" OnClientClick="InsertOneRow();return false;" ToolTip="在上方插入一行" />&nbsp;&nbsp;
+                                        <asp:ImageButton ID="btnImport" runat="server" ImageUrl="~/Images/sheet_import.png"
+                                            Style="position: relative; top: 2px;" CssClass="ToolBarImg1" OnClientClick="return false;"
+                                            onmouseover="import_OnMouseOver(this)" ToolTip="导入" />
+                                        <asp:Button ID="btnUploadItemNo" runat="server" Style="display: none;" OnClientClick="return CollectData();"
+                                            OnClick="btnUploadItemNo_Click" Text="导入货号" />
+                                        <asp:Button ID="btnUploadDetails" runat="server" Style="display: none;" OnClientClick="return CollectData();"
+                                            OnClick="btnUploadDetails_Click" Text="导入明细" />
+                                        <input id="hideFileName" type="text" style="display: none;" runat="server" />
+                                        <div id="import_select_area" class="ui-select-box" style="position: absolute; display: none;
+                                            z-index: 100;" onmouseover="this.style.display='';">
+                                            <ul id="import_select_main" class="ui-select-list">
+                                                <li id="import_itemno" style="border-bottom: 1px solid #ccc;" onmouseover="javascript:this.style.cursor='hand';this.style.backgroundColor='highlight';document.getElementById('spanItemNo').style.color='#fff';"
+                                                    onmouseout="javascript:this.style.backgroundColor='#fff';document.getElementById('spanItemNo').style.color='#000';">
+                                                    <input id="fileUploadItemNo" type="file" runat="server" size="0" style="z-index: 2;
+                                                        width: 75px; height: 18px; position: relative; left: -10px; opacity: 0; filter: alpha(opacity=0);
+                                                        cursor: hand;" onchange="CheckFileType(this);document.getElementById('ctl00_btnUploadItemNo').value=this.id;document.getElementById('ctl00_btnUploadItemNo').click();"
+                                                        title="导入货号" />
+                                                    <span id="spanItemNo" style="position: absolute; top: 0; left: 0px; z-index: 1; width: 100%">
+                                                        &nbsp;导入货号&nbsp;</span></li>
+                                                <li id="import_details" style="border-bottom: 1px solid #ccc;" onmouseover="javascript:this.style.cursor='hand';this.style.backgroundColor='highlight';document.getElementById('spanDetails').style.color='#fff';"
+                                                    onmouseout="javascript:this.style.backgroundColor='#fff';document.getElementById('spanDetails').style.color='#000';">
+                                                    <input id="fileUploadDetails" type="file" runat="server" size="0" style="z-index: 2;
+                                                        width: 75px; height: 18px; position: relative; left: -10px; opacity: 0; filter: alpha(opacity=0);
+                                                        cursor: hand;" onchange="CheckFileType(this);document.getElementById('ctl00_btnUploadDetails').value=this.id;document.getElementById('ctl00_btnUploadDetails').click();"
+                                                        title="导入明细" />
+                                                    <span id="spanDetails" style="position: absolute; top: 18; left: 0px; z-index: 1;
+                                                        width: 100%">&nbsp;导入明细&nbsp;</span></li>
+                                            </ul>
+                                        </div>
+                                        &nbsp;&nbsp;
+                                        <asp:ImageButton ID="ImgExport" runat="server" ImageUrl="~/Images/excel.gif" Style="position: relative;
+                                            top: 2px;" CssClass="ToolBarImg1" OnClientClick="return false;" onmouseover="export_OnMouseOver(this)"
+                                            ToolTip="导出" />
+                                        &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <iframe id="_exportTarget" name='_exportTarget' style=" display:none;"></iframe>
+                                        <asp:Button ID="btnExportItemNo" runat="server" CommandName="ExportItemNo" OnClientClick="this.form.target='_exportTarget';" OnClick="btnExport_Click"
+                                            Style="display: none;" Text="导出货号" />
+                                        <asp:Button ID="btnExportDetail" runat="server" CommandName="ExportDetail" OnClientClick="this.form.target='_exportTarget';" OnClick="btnExport_Click"
+                                            Style="display: none;" Text="导出明细" />
+                                        <asp:Button ID="btnExportSheet" runat="server" CommandName="ExportSheet" OnClick="btnExport_Click"
+                                            Style="display: none;" Text="导出单据" />
+                                        <div id="export_select_area" class="ui-select-box" style="position: absolute; display: none;
+                                            z-index: 100;" onmouseover="this.style.display='';" onmouseout="this.style.display='none';">
+                                            <ul id="export_select_main" class="ui-select-list">
+                                                <li id="export_itemno" onclick="javascript:if(SaveValidation()) { document.getElementById('<%=btnExportItemNo.ClientID %>').click();}"
+                                                    onmouseover="javascript:this.style.cursor='hand';this.style.backgroundColor='highlight';this.style.color='#fff';"
+                                                    onmouseout="javascript:this.style.backgroundColor='#fff';this.style.color='#000';"
+                                                    style="border-bottom: 1px solid #ccc;">&nbsp;导出货号&nbsp;</li>
+                                                <li id="export_details" onclick="javascript:if(SaveValidation()) {document.getElementById('<%=btnExportDetail.ClientID %>').click();}"
+                                                    onmouseover="javascript:this.style.cursor='hand';this.style.backgroundColor='highlight';this.style.color='#fff';"
+                                                    onmouseout="javascript:this.style.backgroundColor='#fff';this.style.color='#000';">
+                                                    &nbsp;导出明细&nbsp;</li>
+                                                <li id="export_sheet" onclick="javascript:if(SaveValidation()) {if($('#<%=btnPrint.ClientID %>').attr('disabled')=='disabled'){ alert('未审核不能导出单据');return;}document.getElementById('<%=btnExportSheet.ClientID %>').click();}"
+                                                    onmouseover="javascript:this.style.cursor='hand';this.style.backgroundColor='highlight';this.style.color='#fff';"
+                                                    onmouseout="javascript:this.style.backgroundColor='#fff';this.style.color='#000';">
+                                                    &nbsp;导出单据&nbsp;</li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div align="left" id="divGoods" style="overflow: hidden;" onmouseover="try{document.getElementById('export_select_area').style.display = 'none';document.getElementById('import_select_area').style.display = 'none';}catch(e){}">
+                            <asp:ContentPlaceHolder ID="CHPSheetDetail" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </ContentTemplate>
+            <Triggers>
+                <asp:PostBackTrigger ControlID="btnUploadItemNo" runat="server" />
+                <asp:PostBackTrigger ControlID="btnUploadDetails" runat="server" />
+                <asp:PostBackTrigger ControlID="btnExportItemNo" runat="server" />
+                <asp:PostBackTrigger ControlID="btnExportDetail" runat="server" />
+                <asp:PostBackTrigger ControlID="btnExportSheet" runat="server" />
+                <asp:AsyncPostBackTrigger ControlID="btnPrint" />
+            </Triggers>
+        </asp:UpdatePanel>
+        <div id="pnlScan" style="display: none;" title="商品扫描">
+            <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+                <ContentTemplate>
+                    <%--扫描条码弹出层的操作--%>
+                    <table width="99.7%">
+                        <tr>
+                            <td align="right">
+                                条码：
+                            </td>
+                            <td>
+                                <asp:TextBox ID="txtItem" runat="server" TabIndex="0" title="条码不允许有+,×,%,'+'等特殊的符号"
+                                    onkeyup="try{value=value.replace(/[^A-Za-z0-9\-.]/g,'');limitLength(this,40)}catch(e){};"
+                                    CssClass="TextBox" onkeydown="try{if(event.keyCode == 13) {if(document.getElementById('ctl00_txtQty').disabled == true){ScanInsert();return false;} document.getElementById('ctl00_txtQty').select();return false;}}catch(e){}"
+                                    onfocus="this.select();" Width="240px"></asp:TextBox>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                数量：
+                            </td>
+                            <td>
+                                <asp:TextBox ID="txtQty" runat="server" TabIndex="1" CssClass="TextBox" Width="240px"
+                                    Enabled="false" onblur="try{if (!checkObject(this,10)){document.getElementById('ctl00_txtQty').select();return false;}}catch(e){}"
+                                    Text="1.00" onkeydown="try{if(event.keyCode == 13) {ScanInsert();return false;}}catch(e){}"></asp:TextBox>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                &nbsp;
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center" colspan="2">
+                                <asp:Button ID="btnScanAdd" runat="server" CssClass="PtButton" Text="扫描" OnClientClick="if(!ScanInsert()) return false;" />
+                                <%--  <asp:Button ID="btnBack" runat="server" Text="关闭" CssClass="PtButton" OnClientClick="closeDiv('pnlScan');return false;" />--%>
+                            </td>
+                        </tr>
+                    </table>
+                </ContentTemplate>
+                <Triggers>
+                    <asp:AsyncPostBackTrigger ControlID="btnScanAdd" />
+                </Triggers>
+            </asp:UpdatePanel>
+        </div>
+        <div id="pnlReferenceInfo" style="display: none;" title="参考信息">
+            <asp:UpdatePanel ID="UpdatePanel2" runat="server">
+                <ContentTemplate>
+                    <div id="referenceBody" class="reference">
+                        <!--参考内容主体-->
+                        <!--内容通过 AJAX 到后台方法 GetReferenceInfo() 获取-->
+                    </div>
+                </ContentTemplate>
+                <Triggers>
+                    <asp:AsyncPostBackTrigger ControlID="btnScanAdd" />
+                </Triggers>
+            </asp:UpdatePanel>
+        </div>
+    </form>
+    <script src="<%=ResolveUrl("~") %>JS/CommonForSavePrompt.js" type="text/javascript"></script>
+    <script language="javascript" type="text/javascript">
+        function isModalDiv() { return false; }
+        if (document.getElementById("ctl00_hidSheetState").value == "1") {
+            AddOneRow();
+        }
+        function onkeyboard() {
+            try {
+                //27为ESC的快截键
+
+                if (event.keyCode == '8') {
+                    if (event.srcElement.tagName != 'TEXTAREA' && event.srcElement.tagName != 'INPUT' || event.srcElement.readOnly==true) {
+                        event.returnValue = false;
+                    }
+                }
+
+//                if (event.keyCode == 8 && (event.srcElement.readOnly == true || event.srcElement.contentEditable == 'false' || !event.srcElement.type)) { return false; }
+                //alert(window.event.keyCode);
+                if (window.event.keyCode == 50 && window.event.ctrlKey && !document.getElementById("ctl00_btnInsert").disabled) {
+                    //新增：ctrl+2
+                    NewSheet();
+                } else if (window.event.keyCode == 51 && window.event.ctrlKey && !document.getElementById("ctl00_btnSave").disabled) {
+                    //保存：ctrl+3
+                    SaveSheet();
+                } else if (window.event.keyCode == 52 && window.event.ctrlKey && !document.getElementById("ctl00_btnApprove").disabled) {
+                    //审核：ctrl+4
+                    GridDataValidation();
+                    ApproveSheet();
+                    changeBackgroundColor();
+                } else if (window.event.keyCode == 53 && window.event.ctrlKey && !document.getElementById("ctl00_btnDesignPrint").disabled) {
+                    //自定义打印：ctrl+5
+                    PrintSetting();
+                }
+                else if (window.event.keyCode == 113 && !document.getElementById("ctl00_btnScan").disabled) {
+                    //扫描：f2
+                    var pnlScan = $("#pnlScan");
+                    if (pnlScan.is(":hidden"))
+                        ScanItem();
+                    else {
+                        $("span[class='ui-icon ui-icon-closethick']").click();
+                    }
+                } else if (window.event.keyCode == 120 && !document.getElementById("ctl00_btnPrint").disabled) {
+                    //打印：f9
+                    //alert('test');
+                    document.getElementById("ctl00_btnPrint").click();
+                }
+            }
+            catch (e) { }
+        }
+    </script>
+</body>
+</html>
