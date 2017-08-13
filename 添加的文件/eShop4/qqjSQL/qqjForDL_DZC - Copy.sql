@@ -1,4 +1,4 @@
---最后更新日期：10:18 PM 8/12/2017
+--最后更新日期：9:22 PM 8/10/2017
 
 --pos门店绑定
 /*exec sp_executesql N' update t_sys_pos_status  set pos_mac = @pos_mac,status=''1'' where branch_no = @branch_no and pos_id = @pos_id ',
@@ -838,7 +838,7 @@ begin
 		--找出需要处理的数据
 		DECLARE supcust_no_cursor CURSOR FOR 
 		SELECT DISTINCT SubShopNo
-		FROM            Details WITH (UPDLOCK) 
+		FROM            Details
 		WHERE        (@vGeneratePI = 'Y') AND (ScaleType = N'BlackEagle') AND (StoreType = 1) AND (ISNULL(sheet_no_qqj, '') = '')
 
 
@@ -932,7 +932,7 @@ begin
 		--找出需要处理的数据
 		DECLARE d_branch_no_cursor CURSOR FOR 
 		SELECT DISTINCT SubShopNo
-		FROM            Details WITH (UPDLOCK) 
+		FROM            Details
 		WHERE        (@vGenerateDO = 'Y') AND (ScaleType = N'BlackEagle') AND (StoreType = 2) AND (ISNULL(sheet_no_qqj, '') = '')
 
 
@@ -1311,8 +1311,8 @@ FROM            Details AS t1 INNER JOIN
 		--找出需要处理的数据
 		DECLARE UniqueTicketNo_cursor CURSOR FOR 
 		SELECT DISTINCT CAST(t0.ScaleNo AS varchar(50)) + '_' + CAST(t0.TicketNo AS varchar(50)) AS UniqueTicketNo, t0.FlowNo AS vTotalFlowNo, t0.IPPoint AS vIPPoint, dbo.fBoxGetOperIDForElectronicScaleIP(t0.IPPoint, t0.OperatorNo) as vTotalOperatorNo
-		FROM            Details AS t1  WITH (UPDLOCK) INNER JOIN
-								 Total AS t0  WITH (UPDLOCK) ON @vGenerateSaleFlow = 'Y' AND t1.StoreType = 0 AND t0.ScaleType = 'bTwin' AND t1.ScaleType = 'bTwin' AND ISNULL(t1.sheet_no_qqj, '') = '' AND ISNULL(t0.sheet_no_qqj, '') = '' AND 
+		FROM            Details AS t1 INNER JOIN
+								 Total AS t0 ON @vGenerateSaleFlow = 'Y' AND t1.StoreType = 0 AND t0.ScaleType = 'bTwin' AND t1.ScaleType = 'bTwin' AND ISNULL(t1.sheet_no_qqj, '') = '' AND ISNULL(t0.sheet_no_qqj, '') = '' AND 
 								 CAST(t0.ScaleNo AS varchar(50)) + '_' + CAST(t0.TicketNo AS varchar(50)) = CAST(t1.ScaleNo AS varchar(50)) + '_' + CAST(t1.TicketNo AS varchar(50)) AND (t1.SellType IN (0, 2)) 
 
 		OPEN UniqueTicketNo_cursor
@@ -1365,7 +1365,7 @@ FROM            Details AS t1 INNER JOIN
 			--判断是否存在非现金收入
 			select @NoCashDetails_CardNo = ''
 			select @NoCashDetails_CardNo = CardNo
-			FROM            NoCashDetails WITH (UPDLOCK) 
+			FROM            NoCashDetails
 			WHERE CAST(ScaleNo AS varchar(50)) + '_' + CAST(TicketNo AS varchar(50)) = @UniqueTicketNo  AND (ISNULL(sheet_no_qqj, N'') = '')
 
 			INSERT INTO t_rm_payflow_temp

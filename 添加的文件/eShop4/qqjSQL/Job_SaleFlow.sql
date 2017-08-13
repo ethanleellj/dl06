@@ -67,7 +67,7 @@ EXEC @ReturnCode = msdb.dbo.sp_add_jobstep @job_id=@jobId, @step_name=N'1',
 			DECLARE @ErrorSeverity INT;  
 			DECLARE @ErrorState INT;  
 
-			SET @ErrorMessage =  ''ERROR_PROCEDURE: '' + ERROR_PROCEDURE() 
+			SET @ErrorMessage =  ''ERROR_PROCEDURE: '' + isnull(ERROR_PROCEDURE() ,'''')
 								+ ''; '' + char(13) + char(10) + ''ErrorLine: '' + cast(ERROR_LINE() as varchar(50)) 
 								+ ''; '' + char(13) + char(10) + ''ERROR_MESSAGE: '' + ERROR_MESSAGE()  
 								+ ''; '' + char(13) + char(10);  
